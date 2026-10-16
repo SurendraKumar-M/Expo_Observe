@@ -1,18 +1,38 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { useColorScheme } from 'react-native';
+import { Observe, ObserveRoot } from 'expo-observe';
+import { Stack } from 'expo-router';
+import { Text, View } from 'react-native';
 
-import { AnimatedSplashOverlay } from '@/components/animated-icon';
-import AppTabs from '@/components/app-tabs';
+// Keep the splash screen visible while we fetch resources
+Observe.configure({
+  integrations: { 'expo-router': true },
+  dispatchInDebug: true,
+   sampleRate: 1,
+});
 
-SplashScreen.preventAutoHideAsync();
-
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
+function RootLayout() {
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <AnimatedSplashOverlay />
-      <AppTabs />
-    </ThemeProvider>
+    <Stack>
+      <Stack.Screen name="index" />
+      <Stack.Screen name="explore" />
+    </Stack>
+  );
+}
+
+function ErrorFallback() {
+  return (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 }}>
+      <Text>Something went wrong. Please restart the app.</Text>
+    </View>
+  );
+}
+
+export default function ObservedRootLayout() {
+  return (
+    <ObserveRoot errorBoundaryFallback={<ErrorFallback />}>
+      {/* Wrapped in a full-screen View so ObserveRoot can properly hook the layout */}
+      <View style={{ flex: 1 }}>
+        <RootLayout />
+      </View>
+    </ObserveRoot>
   );
 }
